@@ -11,7 +11,7 @@ admin.initializeApp({
   });
   
   var db = admin.firestore();
-
+console.log("init")
 db.collection('userData').get()
 .then(snapshot => {
   snapshot.forEach(doc => {
