@@ -21,6 +21,11 @@ admin.initializeApp({
 
   app.listen(port, () => console.log(`Example app listening on port ${port}!`))
   
+setInterval(()=>{
+  console.log("ALIVE")
+},600000)
+
+
   var db = admin.firestore();
 console.log("init")
 db.collection('userData').get()
