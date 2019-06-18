@@ -5,6 +5,10 @@ const express = require('express')
 const NodeRSA = require('node-rsa');
 const key = new NodeRSA({b: 512});
 const keysObj = require('./secureContent/keys')
+const fs = require('fs');
+
+key.importKey(keysObj.public, 'pkcs1-public-pem');
+key.importKey(keysObj.private, 'pkcs1-private-pem');
 
 const admin = require('firebase-admin');
 
@@ -25,13 +29,12 @@ admin.initializeApp({
   })
 
   app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+  var db = admin.firestore();
 
 function run(){
-  var db = admin.firestore();
   console.log("init")
   db.collection('userData').get()
   .then(async snapshot => {
-    key.importKey(keysObj.private, 'pkcs1-private-pem');
       let users = [];
     snapshot.forEach(doc => {
         console.log(doc.id)
@@ -51,7 +54,7 @@ function run(){
           var password = user.password;
           var userRef = db.collection('users').doc(username);
           console.log(username)
-          if(username == "10013096@sbstudents.org"||username == "10012734@sbstudents.org"){
+          //if(username == "10013096@sbstudents.org"||username == "10012734@sbstudents.org"){
               var dataObj = await getData(username,password)
               console.log(dataObj)
               if(dataObj["Status"] == "Completed"){
@@ -60,7 +63,7 @@ function run(){
               }else{
                   console.log("Not cached due to bad request")
               }
-          }
+          //}
       }
     });
   }
@@ -114,7 +117,7 @@ async function scrapeMP(page){
           
           });
         const page = await browser.newPage();
-    
+        await page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3738.0 Safari/537.36');
     
         await page.setRequestInterception(true);
         const blockedResourceTypes = [
@@ -250,7 +253,49 @@ async function scrapeMP(page){
       return grades;
   }
 
-var cronJob = cron.job("30 7,12,23 * * *", function(){
+var cronJob = cron.job("10 7,12,18 * * *", function(){
   run();
 }); 
-cronJob.start();
+//cronJob.start();
+run();
+
+
+//BACK UP USERS
+/*db.collection('userData').get()
+.then(async snapshot => {
+    let users = [];
+  snapshot.forEach(doc => {
+      console.log(doc.id)
+      if (doc.exists) {
+        if(doc.data()["password"]){
+          var username = doc.id;
+          var password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
+          users.push({username,password});
+        }
+      }
+    })
+      return users;
+  }).then((users)=>{
+    fs.writeFileSync("backup.json",JSON.stringify(users))
+  });*/
+
+  //DELETE PASSWORD OR ADD ENCRIPTED PASSWORDS
+  /*let FieldValue = require('firebase-admin').firestore.FieldValue;
+
+  db.collection('userData').get()
+.then(async snapshot => {
+  snapshot.forEach(doc => {
+      console.log(doc.id)
+      if (doc.exists) {
+        if(doc.data()["password"]){
+          var username = doc.id;
+          var password = doc.data()["password"];
+          var encrptedPass = key.encrypt(password, 'base64')
+          var userRef = db.collection('userData').doc(username);
+          userRef.update({
+            password: FieldValue.delete()            //encrptedPass
+          })
+        }
+      }
+    })
+  })*/
