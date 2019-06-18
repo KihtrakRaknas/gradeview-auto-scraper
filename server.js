@@ -2,6 +2,9 @@ const puppeteer = require('puppeteer');
 const $ = require('cheerio');
 const url = 'https://students.sbschools.org/genesis/parents?gohome=true';
 const express = require('express')
+const NodeRSA = require('node-rsa');
+const key = new NodeRSA({b: 512});
+const keysObj = require('./secureContent/keys')
 
 const admin = require('firebase-admin');
 
@@ -28,13 +31,14 @@ function run(){
   console.log("init")
   db.collection('userData').get()
   .then(async snapshot => {
+    key.importKey(keysObj.private, 'pkcs1-private-pem');
       let users = [];
     snapshot.forEach(doc => {
         console.log(doc.id)
         if (doc.exists) {
-          if(doc.data()["password"]){
+          if(doc.data()["password"]||doc.data()["passwordEncrypted"]){
             var username = doc.id;
-            var password = doc.data()["password"];
+            var password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
             //password? password : decode (encrpted)
             users.push({username,password});
           }
