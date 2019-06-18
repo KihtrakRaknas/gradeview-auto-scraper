@@ -6,9 +6,17 @@ const admin = require('firebase-admin');
 
 var serviceAccount = require('./secureContent/serviceKey.json');
 
+const app = express()
+const port = process.env.PORT || 3000
+
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
   });
+
+  app.get('/', async (req, res) => {
+    console.log("RUNINNG")
+    res.json({HEY:"HEY"})
+  })
   
   var db = admin.firestore();
 console.log("init")
