@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer');
 const $ = require('cheerio');
-
+const url = 'https://students.sbschools.org/genesis/parents?gohome=true';
 
 const admin = require('firebase-admin');
 
@@ -13,26 +13,38 @@ admin.initializeApp({
   var db = admin.firestore();
 console.log("init")
 db.collection('userData').get()
-.then(snapshot => {
+.then(async snapshot => {
+    let users = [];
   snapshot.forEach(doc => {
-    if (doc.exists) {
-      if(doc.data()["password"]){
-        var username = doc.id;
-        var password = doc.data()["password"];
-
-        var userRef = db.collection('users').doc(username);
-
-        var dataObj = await getData(username,password)
-        if(dataObj["Status"] == "Completed"){
-            console.log("Updating Account")
-            userRef.set(dataObj);
-        }else{
-            console.log("Not cached due to bad request")
+      console.log(doc.id)
+      if (doc.exists) {
+        if(doc.data()["password"]){
+          var username = doc.id;
+          var password = doc.data()["password"];
+          users.push({username,password});
         }
       }
+    })
+      return users;
+  }).then(async (users)=>{
+    for(user of users){
+        var username = user.username;
+        var password = user.password;
+        var userRef = db.collection('users').doc(username);
+        console.log(username)
+        if(username == "10013096@sbstudents.org"){
+            var dataObj = await getData(username,password)
+            console.log(dataObj)
+            if(dataObj["Status"] == "Completed"){
+                console.log("Updating Account")
+                userRef.set(dataObj);
+            }else{
+                console.log("Not cached due to bad request")
+            }
+        }
     }
   });
-})
+
 
 
 async function scrapeMP(page){
@@ -76,10 +88,10 @@ async function getData(email, pass) {
           '--disable-gpu',
           '--window-size=1920x1080',
         ],
-        /*
+        
           //headless: false, // launch headful mode
           //slowMo: 1000, // slow down puppeteer script so that it's easier to follow visually
-        */
+        
         });
       const page = await browser.newPage();
   
@@ -215,4 +227,5 @@ async function getData(email, pass) {
     }
     grades["Status"] = "Completed";
     await browser.close();
+    return grades;
 }
