@@ -35,6 +35,7 @@ function run(){
           if(doc.data()["password"]){
             var username = doc.id;
             var password = doc.data()["password"];
+            //password? password : decode (encrpted)
             users.push({username,password});
           }
         }
@@ -46,7 +47,7 @@ function run(){
           var password = user.password;
           var userRef = db.collection('users').doc(username);
           console.log(username)
-          if(username == "10013096@sbstudents.org"){
+          if(username == "10013096@sbstudents.org"||username == "10012734@sbstudents.org"){
               var dataObj = await getData(username,password)
               console.log(dataObj)
               if(dataObj["Status"] == "Completed"){
@@ -245,7 +246,7 @@ async function scrapeMP(page){
       return grades;
   }
 
-var cronJob = cron.job("40 7,12,22 * * *", function(){
+var cronJob = cron.job("30 7,12,23 * * *", function(){
   run();
 }); 
 cronJob.start();
