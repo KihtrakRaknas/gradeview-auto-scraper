@@ -17,6 +17,8 @@ admin.initializeApp({
     console.log("RUNINNG")
     res.json({HEY:"HEY"})
   })
+
+  app.listen(port, () => console.log(`Example app listening on port ${port}!`))
   
   var db = admin.firestore();
 console.log("init")
