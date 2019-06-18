@@ -24,7 +24,9 @@ admin.initializeApp({
 setInterval(()=>{
   console.log("ALIVE")
 },600000)
-
+setInterval(()=>{
+  console.log("ALIVE2")
+},60000)
 
   var db = admin.firestore();
 console.log("init")
