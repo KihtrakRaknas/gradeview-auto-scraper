@@ -257,7 +257,7 @@ var cronJob = cron.job("30 7,12,4 * * *", function(){
   run();
 }); 
 cronJob.start();
-run();
+//run();
 
 
 //BACK UP USERS
