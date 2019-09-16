@@ -256,28 +256,72 @@ async function scrapeMP(page){
 var cronJob = cron.job("30 7,12,16 * * *", function(){
   run();
 }); 
-cronJob.start();
+//cronJob.start();
 //run();
 
-
+const fetch = require("node-fetch");
 //BACK UP USERS
 /*db.collection('userData').get()
 .then(async snapshot => {
-    let users = [];
-  snapshot.forEach(doc => {
-      console.log(doc.id)
-      if (doc.exists) {
-        if(doc.data()["password"]){
-          var username = doc.id;
-          var password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
-          users.push({username,password});
-        }
-      }
-    })
-      return users;
+  return fetch('https://raw.githubusercontent.com/KihtrakRaknas/DirectoryScraper/master/outputObj.json', {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        },
+      })
+      .then((response) => {
+        return response.json();
+      })
+      .then((responseJson) => {
+        let users = [];
+        snapshot.forEach(doc => {
+            console.log(doc.id)
+            if (doc.exists) {
+              if(doc.data()["password"]||doc.data()["passwordEncrypted"]  ){
+                var email = doc.id;
+                var password = doc.data()["passwordEncrypted"]//doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
+                var name = responseJson[doc.id];
+                users.push({email,password,name});
+              }
+            }
+          })
+          return users;
+      })
   }).then((users)=>{
-    fs.writeFileSync("backup.json",JSON.stringify(users))
+    var backUpRef = db.collection('userEmails').doc("backup");
+    backUpRef.update({backup: users});
+    //fs.writeFileSync("backup.json",JSON.stringify(users))
   });*/
+
+  //DELETE USERS ):
+  db.collection('userData').get()
+.then(async snapshot => {
+        snapshot.forEach(doc => {
+            console.log(doc.id)
+            if(doc.id!="10013074@sbstudents.org"&&doc.id!="10015503@sbstudents.org"){
+              db.collection('userData').doc(doc.id).delete().then(function() {
+                  console.log("Document successfully deleted :(");
+              }).catch(function(error) {
+                  console.error("Error removing document: ", error);
+              });
+            }
+      })
+  });
+
+  //DELETE ALL TOKENS ):
+  /*db.collection('tokenReverseIndex').get()
+  .then(async snapshot => {
+          snapshot.forEach(doc => {
+              console.log(doc.id)
+                db.collection('tokenReverseIndex').doc(doc.id).delete().then(function() {
+                  console.log("Document successfully deleted!");
+              }).catch(function(error) {
+                  console.error("Error removing document: ", error);
+              });
+              
+        })
+    });*/
 
   //DELETE PASSWORD OR ADD ENCRIPTED PASSWORDS
   /*let FieldValue = require('firebase-admin').firestore.FieldValue;
