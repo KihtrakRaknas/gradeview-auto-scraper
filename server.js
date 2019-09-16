@@ -215,12 +215,13 @@ async function scrapeMP(page){
                     else
                       return null;
               });
-            
-          if(!grades[ClassName][defaultMP])
-            grades[ClassName][defaultMP] = {}
-          grades[ClassName][defaultMP]["Assignments"] = await scrapeMP(page);
-          grades[ClassName][defaultMP]["avg"] = await page.evaluate(()=>document.getElementsByTagName("b")[0].innerText.replace(/\s+/g, '').replace(/[^\d.%]/g,''))
-          //console.log(ClassName)
+          if(await page.evaluate(()=>{return document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('1?[0-9]/[1-3]?[0-9]/[0-9][0-9]'))?new Date()-new Date(document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))).getTime()>0:false})){
+            if(!grades[ClassName][defaultMP])
+              grades[ClassName][defaultMP] = {}
+            grades[ClassName][defaultMP]["Assignments"] = await scrapeMP(page);
+            grades[ClassName][defaultMP]["avg"] = await page.evaluate(()=>document.getElementsByTagName("b")[0].innerText.replace(/\s+/g, '').replace(/[^\d.%]/g,''))
+            //console.log(ClassName)
+          }
           for(var indivMarkingPeriod of markingPeriods){
             if(indivMarkingPeriod){
                 
@@ -242,15 +243,16 @@ async function scrapeMP(page){
                 },indivMarkingPeriod);
                 await page.waitForNavigation({ waitUntil: 'domcontentloaded' })
                 
-                //console.log("MP switch")
-                
-                if(!grades[ClassName][indivMarkingPeriod])
-                  grades[ClassName][indivMarkingPeriod] = {}
-                //console.log("Scraping page")
-                grades[ClassName][indivMarkingPeriod]["Assignments"] = await scrapeMP(page);
-                  //console.log("Getting avg")
-                grades[ClassName][indivMarkingPeriod]["avg"] = await page.evaluate(()=>document.getElementsByTagName("b")[0].innerText.replace(/\s+/g, '').replace(/[^\d.%]/g,''))
-                  //console.log("Done")
+                //console.log(page.evaluate(()=>{return document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))?new Date()-new Date(document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))).getTime()>0:false}))
+                if(await page.evaluate(()=>{return document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))?new Date()-new Date(document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))).getTime()>0:false})){
+                  if(!grades[ClassName][indivMarkingPeriod])
+                    grades[ClassName][indivMarkingPeriod] = {}
+                  //console.log("Scraping page")
+                  grades[ClassName][indivMarkingPeriod]["Assignments"] = await scrapeMP(page);
+                    //console.log("Getting avg")
+                  grades[ClassName][indivMarkingPeriod]["avg"] = await page.evaluate(()=>document.getElementsByTagName("b")[0].innerText.replace(/\s+/g, '').replace(/[^\d.%]/g,''))
+                    //console.log("Done")
+                }
             }
           }
         }
