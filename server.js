@@ -257,7 +257,7 @@ var cronJob = cron.job("30 7,12,16 * * *", function(){
   run();
 }); 
 //cronJob.start();
-//run();
+run();
 
 const fetch = require("node-fetch");
 //BACK UP USERS
@@ -295,8 +295,8 @@ const fetch = require("node-fetch");
   });*/
 
   //DELETE USERS ):
-  db.collection('userData').get()
-.then(async snapshot => {
+  /*db.collection('userData').get()
+  .then(async snapshot => {
         snapshot.forEach(doc => {
             console.log(doc.id)
             if(doc.id!="10013074@sbstudents.org"&&doc.id!="10015503@sbstudents.org"){
@@ -307,7 +307,7 @@ const fetch = require("node-fetch");
               });
             }
       })
-  });
+  });*/
 
   //DELETE ALL TOKENS ):
   /*db.collection('tokenReverseIndex').get()
