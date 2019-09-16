@@ -19,6 +19,7 @@ const port = process.env.PORT || 3000
 
 var cron = require('cron');
 
+
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
   });
