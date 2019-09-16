@@ -19,7 +19,6 @@ const port = process.env.PORT || 3000
 
 var cron = require('cron');
 
-
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
   });
@@ -186,8 +185,15 @@ async function scrapeMP(page){
         //await page.waitForNavigation({ waitUntil: 'domcontentloaded' })
       //await page.evaluate(text => [...document.querySelectorAll('*')].find(e => e.textContent.trim() === text).click(), "Course Summary");
       //await page.waitForNavigation({ waitUntil: 'domcontentloaded' })
-    
-      const classes = await page.evaluate( () => (Array.from( (document.getElementById("fldCourse")).childNodes, element => element.value ) ));
+      let classes;
+        try{
+          classes = await page.evaluate( () => (Array.from( (document.getElementById("fldCourse")).childNodes, element => element.value ) ));
+        }catch(err){
+          await browser.close();
+          console.log("No AUP??? - No Courses Found")
+          return {Status:"No Courses Found"};
+        }
+        
     
       for(var indivClass of classes){
         if(indivClass){
