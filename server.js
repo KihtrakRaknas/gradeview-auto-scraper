@@ -262,7 +262,7 @@ async function scrapeMP(page){
       return grades;
   }
 
-var cronJob = cron.job("25 7,11,14,16 * * *", function(){
+var cronJob = cron.job("25 7,16 * * *", function(){
   run();
 }); 
 cronJob.start();
