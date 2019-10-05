@@ -266,8 +266,8 @@ var cronJob = cron.job("25 7,16 * * *", function(){
   run();
 }); 
 
-//cronJob.start();
-//run();
+cronJob.start();
+run();
 
 const fetch = require("node-fetch");
 //BACK UP USERS
