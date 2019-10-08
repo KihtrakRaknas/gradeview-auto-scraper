@@ -262,9 +262,9 @@ async function scrapeMP(page){
       return grades;
   }
 
-var cronJob = cron.job("25 7,16 * * *", function(){
+var cronJob = cron.job("25 7,16,12 * * *", function(){
   run();
-}); 
+},null,false,"America/New_York"); 
 
 cronJob.start();
 run();
