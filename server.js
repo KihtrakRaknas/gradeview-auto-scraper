@@ -56,7 +56,7 @@ function run(){
           console.log(username)
           //if(username == "10013096@sbstudents.org"||username == "10012734@sbstudents.org"){
               var dataObj = await getData(username,password)
-              console.log(dataObj)
+              //console.log(dataObj)
               if(dataObj["Status"] == "Completed"){
                   console.log("Updating Account")
                   userRef.set(dataObj);
@@ -88,7 +88,12 @@ async function scrapeMP(page){
           //console.log(node.childNodes[9].innerText);
           assignData["Name"] = node.childNodes[9].innerText;
           //console.log(node.childNodes[11].childNodes[0].textContent.replace(/\s/g,''));
-          assignData["Grade"] = node.childNodes[11].childNodes[0].textContent.replace(/\s/g,'')
+          if(node.childNodes[11].childNodes.length<=3){
+            assignData["Grade"] = node.childNodes[11].childNodes[0].textContent.replace(/\s/g,'')
+          }else{
+            assignData["Grade"] = node.childNodes[11].childNodes[2].textContent.replace(/\s/g,'')
+            assignData["Weighting"] = node.childNodes[11].childNodes[1].textContent.replace(/\s/g,'').substring(1)
+          }
           assignments.push(assignData);
           }
       }
@@ -268,7 +273,7 @@ var cronJob = cron.job("25 7,9,11,13,16 * * *", function(){
   run();
 },null,false,"America/New_York"); 
 
-cronJob.start();
+//cronJob.start();
 run();
 
 const fetch = require("node-fetch");
