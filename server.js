@@ -67,6 +67,7 @@ function run(){
       }
     }).then(async ()=>{
       console.log("Done!")
+      run();
     });
   }
 
@@ -269,11 +270,11 @@ async function scrapeMP(page){
       return grades;
   }
 
-var cronJob = cron.job("25 7,9,11,13,16 * * *", function(){
+var cronJob = cron.job("15 6 * * *", function(){ //25 7,9,11,13,16 * * *
   run();
 },null,false,"America/New_York"); 
 
-//cronJob.start();
+cronJob.start();
 run();
 
 const fetch = require("node-fetch");
