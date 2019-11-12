@@ -31,8 +31,19 @@ admin.initializeApp({
   app.listen(port, () => console.log(`Example app listening on port ${port}!`))
   var db = admin.firestore();
 
+function updateTimeStamps(){
+  db.collection('errors').doc("Auto-Scraper").get().then(doc => {
+    db.collection('errors').doc("Auto-Scraper").update({
+      secondLastCompletion: doc.data()["lastCompletion"],
+      lastCompletion: new Date().getTime()
+    })
+    
+  })
+}
+
 function run(){
   console.log("init")
+  updateTimeStamps();
   db.collection('userData').get()
   .then(async snapshot => {
       let users = [];
