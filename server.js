@@ -107,7 +107,7 @@ async function scrapeMP(page){
             assignData["Weighting"] = node.childNodes[11].childNodes[1].textContent.replace(/\s/g,'').substring(1)
           }
           if(node.childNodes[13].textContent.replace(/\s/g,'')!="")
-            assignData["Comment"] = node.childNodes[13].textContent.replace(/\s/g,'')
+            assignData["Comment"] = node.childNodes[13].textContent.trim()
           assignments.push(assignData);
           }
       }
