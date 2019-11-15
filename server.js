@@ -41,6 +41,14 @@ function updateTimeStamps(){
   })
 }
 
+db.collection('errors').doc("Auto-Scraper").get().then(doc => {
+  db.collection('errors').doc("Auto-Scraper").update({
+    secondLastRestart: doc.data()["lastRestart"],
+    lastRestart: new Date().getTime()
+  })
+  
+})
+
 userDataList = [];
 
 function run(){
@@ -49,8 +57,9 @@ function run(){
   db.collection('userData').get()
   .then(async snapshot => {
       let users = [];
+      console.log("GETTING LIST OF USERS")
     snapshot.forEach(doc => {
-        console.log(doc.id)
+        //console.log(doc.id)
         if (doc.exists) {
           if(doc.data()["password"]||doc.data()["passwordEncrypted"]){
             var username = doc.id;
@@ -60,15 +69,14 @@ function run(){
           }
         }
       })
-      let finalUsers = []
+      /*let finalUsers = []
       for(user of users)
         if(user.username == "10013096@sbstudents.org"||user.username == "10012734@sbstudents.org"||user.username == "10013095@sbstudents.org"||user.username == "10013090@sbstudents.org")
           finalUsers.push(user);
-      users = finalUsers;
+      users = finalUsers;*/
       return users;
     }).then(async (users)=>{
       for(user of users){
-        console.log(userDataList)
         if(userDataList.length > 1){
           if(userDataList.length!=users.length)
             listObj = userDataList[userDataList.length-2]
