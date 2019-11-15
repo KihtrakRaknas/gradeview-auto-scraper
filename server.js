@@ -46,7 +46,6 @@ db.collection('errors').doc("Auto-Scraper").get().then(doc => {
     secondLastRestart: doc.data()["lastRestart"],
     lastRestart: new Date().getTime()
   })
-  
 })
 
 userDataList = [];
