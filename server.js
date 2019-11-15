@@ -41,6 +41,8 @@ function updateTimeStamps(){
   })
 }
 
+userDataList = [];
+
 function run(){
   console.log("init")
   updateTimeStamps();
@@ -58,22 +60,46 @@ function run(){
           }
         }
       })
-        return users;
+      let finalUsers = []
+      for(user of users)
+        if(user.username == "10013096@sbstudents.org"||user.username == "10012734@sbstudents.org"||user.username == "10013095@sbstudents.org"||user.username == "10013090@sbstudents.org")
+          finalUsers.push(user);
+      users = finalUsers;
+      return users;
     }).then(async (users)=>{
       for(user of users){
+        console.log(userDataList)
+        if(userDataList.length > 1){
+          if(userDataList.length!=users.length)
+            listObj = userDataList[userDataList.length-2]
+          else
+            listObj = userDataList[userDataList.length-1]
+
+          var dataObj = await listObj["data"]
+
+          //TODO: LOOP THROUGH ARRAY (userDataList) AND DELETE the objects to save memory
+
+          if(dataObj["Status"] == "Completed"){
+            console.log("Updating Account - "+listObj["username"])
+            listObj["userRef"].set(dataObj);
+          }else{
+              console.log("Not cached due to bad request - "+listObj["username"])
+          }
+
+          var index = userDataList.indexOf(listObj);
+          if (index > -1) {
+            userDataList.splice(index, 1);
+          }
+        }
           var username = user.username;
           var password = user.password;
           var userRef = db.collection('users').doc(username);
-          console.log(username)
+          console.log("Starting scrape - "+username)
           //if(username == "10013096@sbstudents.org"||username == "10012734@sbstudents.org"){
-              var dataObj = await getData(username,password)
+              var dataObj = getData(username,password)
+              userDataList.push({data:dataObj,username,userRef})
               //console.log(dataObj)
-              if(dataObj["Status"] == "Completed"){
-                  console.log("Updating Account")
-                  userRef.set(dataObj);
-              }else{
-                  console.log("Not cached due to bad request")
-              }
+              
           //}
       }
     }).then(async ()=>{
