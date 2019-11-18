@@ -102,7 +102,7 @@ function run(){
           var password = user.password;
           var userRef = db.collection('users').doc(username);
           console.log("Starting scrape - "+username)
-          //if(username == "10013096@sbstudents.org"||username == "10012734@sbstudents.org"){
+          //if(username == "10015309@sbstudents.org"||username == "10015311@sbstudents.org"){//if(username == "10013096@sbstudents.org"||username == "10012734@sbstudents.org"){
               var dataObj = getData(username,password)
               userDataList.push({data:dataObj,username,userRef})
               //console.log(dataObj)
@@ -137,7 +137,7 @@ async function scrapeMP(page){
             assignData["Grade"] = node.childNodes[11].childNodes[0].textContent.replace(/\s/g,'')
           }else{
             assignData["Grade"] = node.childNodes[11].childNodes[2].textContent.replace(/\s/g,'')
-            assignData["Weighting"] = node.childNodes[11].childNodes[1].textContent.replace(/\s/g,'').substring(1)
+            assignData["Weighting"] = node.childNodes[11].childNodes[1].textContent.replace(/\s/g,'')
           }
           if(node.childNodes[13].textContent.replace(/\s/g,'')!="")
             assignData["Comment"] = node.childNodes[13].textContent.trim()
@@ -172,6 +172,10 @@ async function scrapeMP(page){
           }).catch((err)=>{
             console.log(err)
           });
+          if(browser == null){
+            console.log("Chrome Crashed----------------------------------------------------------")
+            return {Status:"Chrome Crashed"};
+          }
         const page = await browser.newPage();
         await page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3738.0 Safari/537.36');
     
