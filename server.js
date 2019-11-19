@@ -304,12 +304,15 @@ async function scrapeMP(page){
                   displayMPs();
                   document.getElementsByTagName("BUTTON")[1].click()//"Switch Marking Period btn"
                 },indivMarkingPeriod);
-                let navResult = await page.waitForNavigation({ waitUntil: 'domcontentloaded'}).catch((err)=>{
+                let navResult = true;
+                await page.waitForNavigation({ waitUntil: 'domcontentloaded'}).catch((err)=>{
                   console.log(err)
-                });
-
-                if(navResult==null){
                   console.log("Page Timed-out (switch MP) ----------------------------------------------------------")
+                  navResult = false;
+                });
+                if(!navResult){
+                  await browser.close();
+                  console.log("Page Timed-out received - broswer closed")
                   return {Status: "Page Timed-out"}
                 }
                 
