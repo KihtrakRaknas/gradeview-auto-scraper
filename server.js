@@ -76,7 +76,7 @@ function run(){
       return users;
     }).then(async (users)=>{
       for(user of users){
-        const maxParalellChromes = 5; // 2 - 20 ; 3 - 20;4-30; 5
+        const maxParalellChromes = 5; // 2 - 20 ; 3 - 20;4-30; 5 - crashing
         if(userDataList.length > maxParalellChromes-1){
           if(userDataList.length!=users.length)
             listObj = userDataList[userDataList.length-maxParalellChromes]
@@ -261,7 +261,7 @@ async function scrapeMP(page){
           //indivClass
           await page.evaluate((classID) => changeCourse(classID),indivClass);
           await page.waitForNavigation({ waitUntil: 'domcontentloaded' }).catch(()=>{
-            await browser.close();
+            browser.close();
             console.log("Page Failed To Load - indiv class")
             return {Status:"Page Failed To Load"};
           })
@@ -307,7 +307,7 @@ async function scrapeMP(page){
                   document.getElementsByTagName("BUTTON")[1].click()//"Switch Marking Period btn"
                 },indivMarkingPeriod);
                 await page.waitForNavigation({ waitUntil: 'domcontentloaded' }).catch(()=>{
-                  await browser.close();
+                  browser.close();
                   console.log("Page Failed To Load - switch MP")
                   return {Status:"Page Failed To Load"};
                 })
