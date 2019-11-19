@@ -76,9 +76,10 @@ function run(){
       return users;
     }).then(async (users)=>{
       for(user of users){
-        if(userDataList.length > 1){
+        const maxParalellChromes = 10;
+        if(userDataList.length > maxParalellChromes-1){
           if(userDataList.length!=users.length)
-            listObj = userDataList[userDataList.length-2]
+            listObj = userDataList[userDataList.length-maxParalellChromes]
           else
             listObj = userDataList[userDataList.length-1]
 
