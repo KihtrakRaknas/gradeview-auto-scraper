@@ -76,7 +76,7 @@ function run(){
       return users;
     }).then(async (users)=>{
       for(user of users){
-        const maxParalellChromes = 5; // 2 - 20 ; 3 - 20;4-30; 5 - crashing
+        const maxParalellChromes = 3; // 2 - 20 ; 3 - 20;4-30; 5 -crash
         if(userDataList.length > maxParalellChromes-1){
           if(userDataList.length!=users.length)
             listObj = userDataList[userDataList.length-maxParalellChromes]
@@ -260,11 +260,7 @@ async function scrapeMP(page){
         if(indivClass){
           //indivClass
           await page.evaluate((classID) => changeCourse(classID),indivClass);
-          await page.waitForNavigation({ waitUntil: 'domcontentloaded' }).catch(()=>{
-            browser.close();
-            console.log("Page Failed To Load - indiv class")
-            return {Status:"Page Failed To Load"};
-          })
+          await page.waitForNavigation({ waitUntil: 'domcontentloaded' })
           const markingPeriods = await page.evaluate( () => (Array.from( (document.getElementById("fldSwitchMP")).childNodes, element => element.value ) ));
           const defaultMP = await page.evaluate(()=>document.getElementById("fldSwitchMP").value);
           markingPeriods.splice(markingPeriods.indexOf(defaultMP), 1);
@@ -306,11 +302,7 @@ async function scrapeMP(page){
                   displayMPs();
                   document.getElementsByTagName("BUTTON")[1].click()//"Switch Marking Period btn"
                 },indivMarkingPeriod);
-                await page.waitForNavigation({ waitUntil: 'domcontentloaded' }).catch(()=>{
-                  browser.close();
-                  console.log("Page Failed To Load - switch MP")
-                  return {Status:"Page Failed To Load"};
-                })
+                await page.waitForNavigation({ waitUntil: 'domcontentloaded' })
                 
                 //console.log(page.evaluate(()=>{return document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))?new Date()-new Date(document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))).getTime()>0:false}))
                 if(await page.evaluate(()=>{return document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))?new Date()-new Date(document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))).getTime()>0:false})){
