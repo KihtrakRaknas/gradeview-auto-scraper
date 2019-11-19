@@ -302,7 +302,7 @@ async function scrapeMP(page){
                   displayMPs();
                   document.getElementsByTagName("BUTTON")[1].click()//"Switch Marking Period btn"
                 },indivMarkingPeriod);
-                await page.waitForNavigation({ waitUntil: 'domcontentloaded' })
+                await page.waitForNavigation({ waitUntil: 'domcontentloaded' , timeout: 60000})
                 
                 //console.log(page.evaluate(()=>{return document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))?new Date()-new Date(document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))).getTime()>0:false}))
                 if(await page.evaluate(()=>{return document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))?new Date()-new Date(document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))).getTime()>0:false})){
