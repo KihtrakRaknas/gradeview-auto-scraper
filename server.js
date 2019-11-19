@@ -76,7 +76,7 @@ function run(){
       return users;
     }).then(async (users)=>{
       for(user of users){
-        const maxParalellChromes = 3;
+        const maxParalellChromes = 4;
         if(userDataList.length > maxParalellChromes-1){
           if(userDataList.length!=users.length)
             listObj = userDataList[userDataList.length-maxParalellChromes]
