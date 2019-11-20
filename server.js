@@ -76,7 +76,7 @@ function run(){
       return users;
     }).then(async (users)=>{
       for(user of users){
-        const maxParalellChromes = 4; // 2 - 20 ; 3 - 20;4-30; 5 -crash
+        const maxParalellChromes = 3; // 2 - 20 ; 3 - 20;4-30; 5 -crash
         if(userDataList.length > maxParalellChromes-1){
           if(userDataList.length!=users.length)
             listObj = userDataList[userDataList.length-maxParalellChromes]
@@ -262,7 +262,17 @@ async function scrapeMP(page){
         if(indivClass){
           //indivClass
           await page.evaluate((classID) => changeCourse(classID),indivClass);
-          await page.waitForNavigation({ waitUntil: 'domcontentloaded' })
+          let navResult = true;
+          await page.waitForNavigation({ waitUntil: 'domcontentloaded'}).catch((err)=>{
+            console.log(err)
+            console.log("Page Timed-out (switch MP) ----------------------------------------------------------")
+            navResult = false;
+          });
+          if(!navResult){
+            await browser.close();
+            console.log("Page Timed-out received - broswer closed")
+            return {Status: "Page Timed-out"}
+          }
           const markingPeriods = await page.evaluate( () => (Array.from( (document.getElementById("fldSwitchMP")).childNodes, element => element.value ) ));
           const defaultMP = await page.evaluate(()=>document.getElementById("fldSwitchMP").value);
           markingPeriods.splice(markingPeriods.indexOf(defaultMP), 1);
