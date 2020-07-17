@@ -57,17 +57,25 @@ function run(){
   .then(async snapshot => {
       let users = [];
       console.log("GETTING LIST OF USERS")
-    snapshot.forEach(doc => {
+      var timestampPromises = [];
+      snapshot.forEach(doc => {
         //console.log(doc.id)
         if (doc.exists) {
           if(doc.data()["password"]||doc.data()["passwordEncrypted"]){
             var username = doc.id;
-            var password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
-            //password? password : decode (encrpted)
-            users.push({username,password});
+            timestampPromises.push(
+              db.collection('userTimestamps').doc(username).get().then(docTime => {
+                if(docTime.exists && docTime.data()["Timestamp"] > new Date().getTime() - (1000*60*60*24*60)){
+                  var password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
+                  //password? password : decode (encrpted)
+                  users.push({username,password});
+                }
+              })
+            )
           }
         }
       })
+      await Promise.all(timestampPromises);
       /*let finalUsers = []
       for(user of users)
         if(user.username == "10013096@sbstudents.org"||user.username == "10012734@sbstudents.org"||user.username == "10013095@sbstudents.org"||user.username == "10013090@sbstudents.org")
@@ -75,6 +83,7 @@ function run(){
       users = finalUsers;*/
       return users;
     }).then(async (users)=>{
+      console.log(users.length)
       for(user of users){
         const maxParalellChromes = 30; // 2 - 20 ; 3 - 20;4-30; 5 -crash
         if(userDataList.length > maxParalellChromes-1){
@@ -288,7 +297,7 @@ async function scrapeMP(page){
                     else
                       return null;
               });
-          if(await page.evaluate(()=>{return document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('1?[0-9]/[1-3]?[0-9]/[0-9][0-9]'))?new Date()-new Date(document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))).getTime()>0:false})){
+          if(await page.evaluate(()=>{return document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))?new Date()-new Date(document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))).getTime()>0:false})){
             if(!grades[ClassName][defaultMP])
               grades[ClassName][defaultMP] = {}
             grades[ClassName][defaultMP]["Assignments"] = await scrapeMP(page);
