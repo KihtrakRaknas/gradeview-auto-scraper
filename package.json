@@ -12,12 +12,13 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
     "cron": "^1.7.1",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "firebase-admin": "^8.1.0",
     "i": "^0.3.6",
     "node-cron": "^2.0.3",
     "node-rsa": "^1.0.5",
-    "npm": "^6.13.0",
+    "npm": "^6.14.6",
     "puppeteer": "^1.17.0"
   }
 }
