@@ -4,7 +4,7 @@ const url = 'https://students.sbschools.org/genesis/parents?gohome=true';
 const express = require('express')
 const NodeRSA = require('node-rsa');
 const key = new NodeRSA({b: 512});
-const keysObj = require('./secureContent/keys')
+const keysObj = require('./secure_content/keys')
 const fs = require('fs');
 
 key.importKey(keysObj.public, 'pkcs1-public-pem');
@@ -12,7 +12,7 @@ key.importKey(keysObj.private, 'pkcs1-private-pem');
 
 const admin = require('firebase-admin');
 
-var serviceAccount = require('./secureContent/serviceKey.json');
+var serviceAccount = require('./secure_content/serviceKey.json');
 
 const app = express()
 const port = process.env.PORT || 3000
