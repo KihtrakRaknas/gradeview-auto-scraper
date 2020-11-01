@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { getCurrentGrades } = require('./GradeViewGetCurrentGrades/getCurrentGrades');
+const { getCurrentGrades, retriveJustUsername } = require('./GradeViewGetCurrentGrades/getCurrentGrades');
 const express = require('express')
 const NodeRSA = require('node-rsa');
 //const keysObj = require('./secureContent/keys')
@@ -66,7 +66,9 @@ function run(){
                 if(docTime.exists && docTime.data()["Timestamp"] > new Date().getTime() - (1000*60*60*24*60)){
                   var password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
                   //password? password : decode (encrpted)
-                  users.push({username,password});
+                  var school = doc.data()["school"]
+                  username = retriveJustUsername(username)
+                  users.push({username,password,school});
                 }
               })
             )
@@ -108,10 +110,11 @@ function run(){
         }
           var username = user.username;
           var password = user.password;
+          var school = user.school;
           var userRef = db.collection('users').doc(username);
           console.log("Starting scrape - "+username)
           //if(username == "10015309@sbstudents.org"||username == "10015311@sbstudents.org"){//if(username == "10013096@sbstudents.org"||username == "10012734@sbstudents.org"){
-              var dataObj = getCurrentGrades(username,password)
+              var dataObj = getCurrentGrades(username,password,school)
               userDataList.push({data:dataObj,username,userRef})
               //console.log(dataObj)
               
