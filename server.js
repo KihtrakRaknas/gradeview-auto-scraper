@@ -67,7 +67,6 @@ function run(){
                   var password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
                   //password? password : decode (encrpted)
                   var school = doc.data()["school"]
-                  username = retriveJustUsername(username)
                   users.push({username,password,school});
                 }
               })
@@ -112,6 +111,7 @@ function run(){
           var password = user.password;
           var school = user.school;
           var userRef = db.collection('users').doc(username);
+          username=retriveJustUsername(username)
           console.log("Starting scrape - "+username)
           //if(username == "10015309@sbstudents.org"||username == "10015311@sbstudents.org"){//if(username == "10013096@sbstudents.org"||username == "10012734@sbstudents.org"){
               var dataObj = getCurrentGrades(username,password,school)
