@@ -96,7 +96,7 @@ function run(){
           //TODO: LOOP THROUGH ARRAY (userDataList) AND DELETE the objects to save memory
 
           if(dataObj["Status"] == "Completed"){
-            console.log("Updating Account - "+listObj["username"])
+            //console.log("Updating Account - "+listObj["username"])
             try{
               listObj["userRef"].set(dataObj);
             }catch(e){
@@ -104,7 +104,7 @@ function run(){
               console.log(listObj)
             }
           }else{
-              console.log("Not cached due to bad request - "+listObj["username"])
+            //console.log("Not cached due to bad request - "+listObj["username"])
           }
 
           var index = userDataList.indexOf(listObj);
@@ -117,7 +117,7 @@ function run(){
           var school = user.school;
           var userRef = db.collection('users').doc(username);
           username=retriveJustUsername(username)
-          console.log("Starting scrape - "+username)
+          //console.log("Starting scrape - "+username)
           //if(username == "10015309@sbstudents.org"||username == "10015311@sbstudents.org"){//if(username == "10013096@sbstudents.org"||username == "10012734@sbstudents.org"){
               var dataObj = getCurrentGrades(username,password,school)
               userDataList.push({data:dataObj,username,userRef})
