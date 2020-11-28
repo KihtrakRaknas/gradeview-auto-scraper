@@ -97,7 +97,12 @@ function run(){
 
           if(dataObj["Status"] == "Completed"){
             console.log("Updating Account - "+listObj["username"])
-            listObj["userRef"].set(dataObj);
+            try{
+              listObj["userRef"].set(dataObj);
+            }catch(e){
+              console.log(e)
+              console.log(listObj)
+            }
           }else{
               console.log("Not cached due to bad request - "+listObj["username"])
           }
