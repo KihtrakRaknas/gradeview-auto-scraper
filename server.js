@@ -135,7 +135,8 @@ function run(){
   run();
 },null,false,"America/New_York"); 
 cronJob.start();*/
-run();
+if(new Date().getTime() > 1606710523628)
+  run();
 
 
 
