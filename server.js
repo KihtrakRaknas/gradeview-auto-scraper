@@ -49,7 +49,7 @@ db.collection('errors').doc("Auto-Scraper").get().then(doc => {
 let userDataList = [];
 const users = [];
 let first = true;
-db.collection('userData').onSnapshot().then(async snapshot => {
+db.collection('userData').onSnapshot(async snapshot => {
   console.log("GETTING LIST OF USERS")
   let timestampPromises = []
   snapshot.docChanges().forEach(change => {
