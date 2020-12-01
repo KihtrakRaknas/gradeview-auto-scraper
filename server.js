@@ -46,97 +46,106 @@ db.collection('errors').doc("Auto-Scraper").get().then(doc => {
   })
 })
 
-userDataList = [];
+let userDataList = [];
+const users = [];
+let first = true;
+db.collection('userData').onSnapshot().then(async snapshot => {
+  console.log("GETTING LIST OF USERS")
+  let timestampPromises = []
+  snapshot.docChanges().forEach(change => {
+    const doc = change.doc
+    if (doc.exists) {
+      let username = doc.id;
+      let password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
+      let school = doc.data()["school"]
+      if (change.type === 'added' || change.type === 'modified') {
+        if (change.type === 'modified') {
+          let index = users.findIndex(user=>user.username == username);
+          if (index > -1) {
+            users.splice(index, 1);
+          }
+        }
+        if(doc.data()["password"]||doc.data()["passwordEncrypted"]){
+          timestampPromises.push(
+            db.collection('userTimestamps').doc(username).get().then(docTime => {
+              if(docTime.exists && docTime.data()["Timestamp"] > new Date().getTime() - (1000*60*60*24*60)){
+                users.push({username,password,school});
+              }
+            })
+          )
+        }
+      }
+      if (change.type === 'removed') {
+        let index = users.indexOf({username,password,school});
+        if (index > -1) {
+          users.splice(index, 1);
+        }
+      }
+    }
+  });
+  await Promise.all(timestampPromises);
+  if(first){
+    first = false
+    console.log(`CALLING RUN w/ ${users.length} found!`)
+    run();
+  }
+})
 
-function run(){
+async function run(){
   console.log("init")
   updateTimeStamps();
-  db.collection('userData').get()
-  .then(async snapshot => {
-      let users = [];
-      console.log("GETTING LIST OF USERS")
-      var timestampPromises = [];
-      snapshot.forEach(doc => {
-        //console.log(doc.id)
-        if (doc.exists) {
-          if(doc.data()["password"]||doc.data()["passwordEncrypted"]){
-            var username = doc.id;
-            timestampPromises.push(
-              db.collection('userTimestamps').doc(username).get().then(docTime => {
-                if(docTime.exists && docTime.data()["Timestamp"] > new Date().getTime() - (1000*60*60*24*60)){
-                  var password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
-                  //password? password : decode (encrpted)
-                  var school = doc.data()["school"]
-                  users.push({username,password,school});
-                }
-              })
-            )
-          }
+  console.log(users.length)
+  for(user of users){
+    const maxParalellChromes = 5; // 2 - 20 ; 3 - 20;4-30; 5 -crash
+    if(userDataList.length > maxParalellChromes-1){
+      if(userDataList.length!=users.length)
+        listObj = userDataList[userDataList.length-maxParalellChromes]
+      else
+        listObj = userDataList[userDataList.length-1]
+
+      var dataObj = await listObj["data"]
+
+      //TODO: LOOP THROUGH ARRAY (userDataList) AND DELETE the objects to save memory
+
+      if(dataObj["Status"] == "Completed"){
+        console.log("Updating Account - "+listObj["username"])
+        try{
+          listObj["userRef"].set(dataObj);
+        }catch(e){
+          console.log(e)
+          console.log(listObj)
         }
-      })
-      await Promise.all(timestampPromises);
-      /*let finalUsers = []
-      for(user of users)
-        if(user.username == "10013096@sbstudents.org"||user.username == "10012734@sbstudents.org"||user.username == "10013095@sbstudents.org"||user.username == "10013090@sbstudents.org")
-          finalUsers.push(user);
-      users = finalUsers;*/
-      return users;
-    }).then(async (users)=>{
-      console.log(users.length)
-      for(user of users){
-        const maxParalellChromes = 5; // 2 - 20 ; 3 - 20;4-30; 5 -crash
-        if(userDataList.length > maxParalellChromes-1){
-          if(userDataList.length!=users.length)
-            listObj = userDataList[userDataList.length-maxParalellChromes]
-          else
-            listObj = userDataList[userDataList.length-1]
-
-          var dataObj = await listObj["data"]
-
-          //TODO: LOOP THROUGH ARRAY (userDataList) AND DELETE the objects to save memory
-
-          if(dataObj["Status"] == "Completed"){
-            console.log("Updating Account - "+listObj["username"])
-            try{
-              listObj["userRef"].set(dataObj);
-            }catch(e){
-              console.log(e)
-              console.log(listObj)
-            }
-          }else{
-            console.log("Not cached due to bad request - "+listObj["username"])
-          }
-
-          var index = userDataList.indexOf(listObj);
-          if (index > -1) {
-            userDataList.splice(index, 1);
-          }
-        }
-          var username = user.username;
-          var password = user.password;
-          var school = user.school;
-          var userRef = db.collection('users').doc(username);
-          username=retriveJustUsername(username)
-          console.log("Starting scrape - "+username)
-          //if(username == "10015309@sbstudents.org"||username == "10015311@sbstudents.org"){//if(username == "10013096@sbstudents.org"||username == "10012734@sbstudents.org"){
-              var dataObj = getCurrentGrades(username,password,school)
-              userDataList.push({data:dataObj,username,userRef})
-              //console.log(dataObj)
-              
-          //}
+      }else{
+        console.log("Not cached due to bad request - "+listObj["username"])
       }
-    }).then(async ()=>{
-      console.log("Done!")
-      run();
-    });
+
+      var index = userDataList.indexOf(listObj);
+      if (index > -1) {
+        userDataList.splice(index, 1);
+      }
+    }
+    var username = user.username;
+    var password = user.password;
+    var school = user.school;
+    var userRef = db.collection('users').doc(username);
+    username=retriveJustUsername(username)
+    console.log("Starting scrape - "+username)
+    //if(username == "10015309@sbstudents.org"||username == "10015311@sbstudents.org"){//if(username == "10013096@sbstudents.org"||username == "10012734@sbstudents.org"){
+        var dataObj = getCurrentGrades(username,password,school)
+        userDataList.push({data:dataObj,username,userRef})
+        //console.log(dataObj)
+        
+    //}
   }
+  console.log("Done!")
+  run();
+}
 
 /* var cronJob = cron.job("15 6 * * *", function(){ //25 7,9,11,13,16 * * *
   run();
 },null,false,"America/New_York"); 
 cronJob.start();*/
-if(new Date().getTime() > 1606710523628)
-  run();
+
 
 
 
