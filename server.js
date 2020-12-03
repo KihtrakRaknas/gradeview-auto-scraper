@@ -2,6 +2,7 @@ require('dotenv').config();
 const { getCurrentGrades, retriveJustUsername } = require('./GradeViewGetCurrentGrades/getCurrentGrades');
 const express = require('express')
 const NodeRSA = require('node-rsa');
+const _ = require("lodash")
 //const keysObj = require('./secureContent/keys')
 const fs = require('fs');
 const key = new NodeRSA({b: 512});
@@ -48,8 +49,9 @@ db.collection('errors').doc("Auto-Scraper").get().then(doc => {
 
 let userDataList = [];
 const users = [];
+const userDataObj={}
 let first = true;
-db.collection('userData').onSnapshot(async snapshot => {
+const userDataListener = db.collection('userData').onSnapshot(async snapshot => {
   console.log("GETTING LIST OF USERS")
   let timestampPromises = []
   snapshot.docChanges().forEach(change => {
@@ -70,13 +72,16 @@ db.collection('userData').onSnapshot(async snapshot => {
             db.collection('userTimestamps').doc(username).get().then(docTime => {
               if(docTime.exists && docTime.data()["Timestamp"] > new Date().getTime() - (1000*60*60*24*60)){
                 users.push({username,password,school});
+                // db.collection('users').doc(username).onSnapshot(docSnapshot => {
+                //   userDataObj[username] = docSnapshot.data()
+                // })
               }
             })
           )
         }
       }
       if (change.type === 'removed') {
-        let index = users.indexOf({username,password,school});
+        let index = users.findIndex(user=>user.username == username);
         if (index > -1) {
           users.splice(index, 1);
         }
@@ -108,9 +113,15 @@ async function run(){
       //TODO: LOOP THROUGH ARRAY (userDataList) AND DELETE the objects to save memory
 
       if(dataObj["Status"] == "Completed"){
-        console.log("Updating Account - "+listObj["username"])
+        
         try{
-          listObj["userRef"].set(dataObj);
+          if(!listObj.usernameAsItAppearsInDatabase || !_.isEqual(userDataObj[listObj.usernameAsItAppearsInDatabase],dataObj)){
+            userDataObj[listObj.usernameAsItAppearsInDatabase] = dataObj
+            listObj["userRef"].set(dataObj);
+            console.log("Updating Account - "+listObj["username"])
+          }else{
+            console.log("No Changes Found - "+listObj["username"])
+          }
         }catch(e){
           console.log(e)
           console.log(listObj)
@@ -132,7 +143,7 @@ async function run(){
     console.log("Starting scrape - "+username)
     //if(username == "10015309@sbstudents.org"||username == "10015311@sbstudents.org"){//if(username == "10013096@sbstudents.org"||username == "10012734@sbstudents.org"){
         var dataObj = getCurrentGrades(username,password,school)
-        userDataList.push({data:dataObj,username,userRef})
+        userDataList.push({data:dataObj,username,userRef,usernameAsItAppearsInDatabase:user.username})
         //console.log(dataObj)
         
     //}

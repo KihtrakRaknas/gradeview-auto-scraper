@@ -3,3 +3,4 @@ secure_content
 backup.json
 .env
 .vscode
+yarn.lock
