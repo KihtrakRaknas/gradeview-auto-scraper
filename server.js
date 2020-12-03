@@ -51,50 +51,50 @@ let userDataList = [];
 const users = [];
 const userDataObj={}
 let first = true;
-const userDataListener = db.collection('userData').onSnapshot(async snapshot => {
-  console.log("GETTING LIST OF USERS")
-  let timestampPromises = []
-  snapshot.docChanges().forEach(change => {
-    const doc = change.doc
-    if (doc.exists) {
-      let username = doc.id;
-      let password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
-      let school = doc.data()["school"]
-      if (change.type === 'added' || change.type === 'modified') {
-        if (change.type === 'modified') {
-          let index = users.findIndex(user=>user.username == username);
-          if (index > -1) {
-            users.splice(index, 1);
-          }
-        }
-        if(doc.data()["password"]||doc.data()["passwordEncrypted"]){
-          timestampPromises.push(
-            db.collection('userTimestamps').doc(username).get().then(docTime => {
-              if(docTime.exists && docTime.data()["Timestamp"] > new Date().getTime() - (1000*60*60*24*60)){
-                users.push({username,password,school});
-                // db.collection('users').doc(username).onSnapshot(docSnapshot => {
-                //   userDataObj[username] = docSnapshot.data()
-                // })
-              }
-            })
-          )
-        }
-      }
-      if (change.type === 'removed') {
-        let index = users.findIndex(user=>user.username == username);
-        if (index > -1) {
-          users.splice(index, 1);
-        }
-      }
-    }
-  });
-  await Promise.all(timestampPromises);
-  if(first){
-    first = false
-    console.log(`CALLING RUN w/ ${users.length} found!`)
-    run();
-  }
-})
+// const userDataListener = db.collection('userData').onSnapshot(async snapshot => {
+//   console.log("GETTING LIST OF USERS")
+//   let timestampPromises = []
+//   snapshot.docChanges().forEach(change => {
+//     const doc = change.doc
+//     if (doc.exists) {
+//       let username = doc.id;
+//       let password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
+//       let school = doc.data()["school"]
+//       if (change.type === 'added' || change.type === 'modified') {
+//         if (change.type === 'modified') {
+//           let index = users.findIndex(user=>user.username == username);
+//           if (index > -1) {
+//             users.splice(index, 1);
+//           }
+//         }
+//         if(doc.data()["password"]||doc.data()["passwordEncrypted"]){
+//           timestampPromises.push(
+//             db.collection('userTimestamps').doc(username).get().then(docTime => {
+//               if(docTime.exists && docTime.data()["Timestamp"] > new Date().getTime() - (1000*60*60*24*60)){
+//                 users.push({username,password,school});
+//                 // db.collection('users').doc(username).onSnapshot(docSnapshot => {
+//                 //   userDataObj[username] = docSnapshot.data()
+//                 // })
+//               }
+//             })
+//           )
+//         }
+//       }
+//       if (change.type === 'removed') {
+//         let index = users.findIndex(user=>user.username == username);
+//         if (index > -1) {
+//           users.splice(index, 1);
+//         }
+//       }
+//     }
+//   });
+//   await Promise.all(timestampPromises);
+//   if(first){
+//     first = false
+//     console.log(`CALLING RUN w/ ${users.length} found!`)
+//     run();
+//   }
+// })
 
 async function run(){
   console.log("init")
