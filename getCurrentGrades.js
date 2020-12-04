@@ -73,6 +73,51 @@ async function scrapeAssignments(page) {
     return list;
 }
 
+function getPercentFromStr(percent){
+    let finalPercent = percent.replace(/[^\d.%]/g, '')
+    if(!finalPercent){
+        switch(percent) {
+          case "A+":
+            finalPercent = "100%"
+            break;
+          case "A":
+            finalPercent = "96%"
+            break;
+          case "A-":
+            finalPercent = "92%"
+            break;
+          case "B+":
+            finalPercent = "89%"
+            break;
+          case "B":
+            finalPercent = "86%"
+            break;
+          case "B-":
+            finalPercent = "82%"
+            break;
+          case "C+":
+            finalPercent = "79%"
+            break;
+          case "C":
+            finalPercent = "76%"
+            break;
+          case "C-":
+            finalPercent = "72%"
+            break;
+          case "D+":
+            finalPercent = "69%"
+            break;
+          case "D":
+            finalPercent = "66%"
+            break;
+          case "F":
+            finalPercent = "65%"
+            break;
+        } 
+    }
+    return finalPercent
+}
+
 module.exports.createBrowser = async function(params){
     const browser = await puppeteer.launch({
         args: [
@@ -90,12 +135,9 @@ module.exports.createBrowser = async function(params){
     return browser
 }
 
-module.exports.createPage = async function(browser,newPage){
-    let page
-    if(newPage)
-        page = await browser.newPage();
-    else
-        page=(await browser.pages())[0]
+module.exports.createPage = async function(browser){
+    //const page = await browser.newPage();
+    const page=(await browser.pages())[0]
     await page.setUserAgent('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3738.0 Safari/537.36');
     await page.setRequestInterception(true);
     const blockedResourceTypes = ['image','media','font','texttrack','object','beacon','csp_report','imageset','stylesheet'];
@@ -128,8 +170,8 @@ module.exports.getCurrentGrades = async function (email, pass, schoolDomain) {
     pass = encodeURIComponent(pass);
     //Set up browser
     const browser = await module.exports.createBrowser({
-        // headless: false, // launch headful mode
-        // slowMo: 1000, // slow down puppeteer script so that it's easier to follow visually
+        //  headless: false, // launch headful mode
+        //  slowMo: 1000, // slow down puppeteer script so that it's easier to follow visually
     })
     if (browser == null) {
         console.log("Chrome Crashed----------------------------------------------------------")
@@ -165,92 +207,87 @@ module.exports.getCurrentGrades = async function (email, pass, schoolDomain) {
     }
 
     //Loop through the classes the student has taken
-    let classPromises = []
-    for (let indivClass of classes) {
+    for (var indivClass of classes) {
         if (indivClass) {
-            classPromises.push(await new Promise(async (res)=>{
-                //Select the class
-                [courseCode, courseSection]=indivClass.split(":")
-                const assignmentPage = await module.exports.createPage(browser,true)
-                assignmentPage.goto(`${courseSummaryTabURL}&action=form&courseCode=${courseCode}&courseSection=${courseSection}`/*, { waitUntil: 'domcontentloaded' }*/)
-                let navResult = true;
-                await assignmentPage.waitForNavigation({ waitUntil: 'domcontentloaded' }).catch((err) => {
-                    console.log(err)
-                    console.log("Page Timed-out (switch MP) ----------------------------------------------------------")
-                    navResult = false;
-                });
-                if (!navResult) {
-                    await browser.close();
-                    console.log("Page Timed-out received - broswer closed")
-                    return { Status: "Page Timed-out" }
-                }
-                //Get an array of Marking Periods that the class has grades for
-                const markingPeriods = await assignmentPage.evaluate(() => (Array.from((document.getElementById("fldSwitchMP")).childNodes, element => element.value)));
-                const defaultMP = await assignmentPage.evaluate(() => document.getElementById("fldSwitchMP").value);
-                markingPeriods.splice(markingPeriods.indexOf(defaultMP), 1);
-                //Get class name and teacher
-                const ClassName = await assignmentPage.evaluate((classID) => document.querySelectorAll('[value="' + classID + '"]')[0].innerText, indivClass);
-                if (!grades[ClassName])
-                    grades[ClassName] = {}
-                grades[ClassName]["teacher"] = await assignmentPage.evaluate(() => {
-                    let list = document.getElementsByClassName("list")[0].childNodes[1].childNodes[4].childNodes[5];
-                    if (list)
-                        return list.innerText
-                    else
-                        return null;
-                });
-                //Check if the marking period has started yet
-                if (await assignmentPage.evaluate(() => { return document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]')) ? new Date() - new Date(document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))).getTime() > 0 : false })) {
-                    if (!grades[ClassName][defaultMP])
-                        grades[ClassName][defaultMP] = {}
-                    grades[ClassName][defaultMP]["Assignments"] = await scrapeAssignments(assignmentPage);
-                    grades[ClassName][defaultMP]["avg"] = await assignmentPage.evaluate(() => document.getElementsByTagName("b")[0].innerText.replace(/\s+/g, '').replace(/[^\d.%]/g, ''))
-                }
-                //Loop though the remaining marking periods
-                for (var indivMarkingPeriod of markingPeriods) {
-                    if (indivMarkingPeriod) {
-                        //If the teacher wasn't already added, try to add it now
-                        if (!grades[ClassName]["teacher"]) {
-                            grades[ClassName]["teacher"] = await assignmentPage.evaluate(() => {
-                                let list = document.getElementsByClassName("list")[0].childNodes[1].childNodes[4].childNodes[5];
-                                if (list)
-                                    return list.innerText
-                                else
-                                    return null;
-                            });
-                        }
-                        //Switch to the new marking period
-                        await assignmentPage.evaluate((indivMP) => {
-                            document.getElementById("fldSwitchMP").value = indivMP;
-                            displayMPs();
-                            document.getElementsByTagName("BUTTON")[1].click()//"Switch Marking Period btn"
-                        }, indivMarkingPeriod);
-                        let navResult = true;
-                        //Wait for the new marking period to load
-                        await assignmentPage.waitForNavigation({ waitUntil: 'domcontentloaded' }).catch((err) => {
-                            console.log(err)
-                            console.log("Page Timed-out (switch MP) ----------------------------------------------------------")
-                            navResult = false;
+            //Select the class
+            await page.evaluate((classID) => changeCourse(classID), indivClass);
+            let navResult = true;
+            await page.waitForNavigation({ waitUntil: 'domcontentloaded' }).catch((err) => {
+                console.log(err)
+                console.log("Page Timed-out (switch MP) ----------------------------------------------------------")
+                navResult = false;
+            });
+            if (!navResult) {
+                await browser.close();
+                console.log("Page Timed-out received - broswer closed")
+                return { Status: "Page Timed-out" }
+            }
+            //Get an array of Marking Periods that the class has grades for
+            const markingPeriods = await page.evaluate(() => (Array.from((document.getElementById("fldSwitchMP")).childNodes, element => element.value)));
+            const defaultMP = await page.evaluate(() => document.getElementById("fldSwitchMP").value);
+            markingPeriods.splice(markingPeriods.indexOf(defaultMP), 1);
+            //Get class name and teacher
+            const ClassName = await page.evaluate((classID) => document.querySelectorAll('[value="' + classID + '"]')[0].innerText, indivClass);
+            if (!grades[ClassName])
+                grades[ClassName] = {}
+            grades[ClassName]["teacher"] = await page.evaluate(() => {
+                let list = document.getElementsByClassName("list")[0].childNodes[1].childNodes[4].childNodes[5];
+                if (list)
+                    return list.innerText
+                else
+                    return null;
+            });
+            //Check if the marking period has started yet
+            if (await page.evaluate(() => { return document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]')) ? new Date() - new Date(document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))).getTime() > 0 : false })) {
+                if (!grades[ClassName][defaultMP])
+                    grades[ClassName][defaultMP] = {}
+                grades[ClassName][defaultMP]["Assignments"] = await scrapeAssignments(page);
+                const percent = await page.evaluate(() => document.getElementsByTagName("b")[0].innerText.replace(/\s+/g, ''))
+                grades[ClassName][defaultMP]["avg"] = getPercentFromStr(percent);
+            }
+            //Loop though the remaining marking periods
+            for (var indivMarkingPeriod of markingPeriods) {
+                if (indivMarkingPeriod) {
+                    //If the teacher wasn't already added, try to add it now
+                    if (!grades[ClassName]["teacher"]) {
+                        grades[ClassName]["teacher"] = await page.evaluate(() => {
+                            let list = document.getElementsByClassName("list")[0].childNodes[1].childNodes[4].childNodes[5];
+                            if (list)
+                                return list.innerText
+                            else
+                                return null;
                         });
-                        if (!navResult) {
-                            await browser.close();
-                            console.log("Page Timed-out received - browser closed")
-                            return { Status: "Page Timed-out" }
-                        }
-                        //Check if the marking period has started yet
-                        if (await assignmentPage.evaluate(() => { return document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]')) ? new Date() - new Date(document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))).getTime() > 0 : false })) {
-                            if (!grades[ClassName][indivMarkingPeriod])
-                                grades[ClassName][indivMarkingPeriod] = {}
-                            grades[ClassName][indivMarkingPeriod]["Assignments"] = await scrapeAssignments(page);
-                            grades[ClassName][indivMarkingPeriod]["avg"] = await page.evaluate(() => document.getElementsByTagName("b")[0].innerText.replace(/\s+/g, '').replace(/[^\d.%]/g, ''))
-                        }
+                    }
+                    //Switch to the new marking period
+                    await page.evaluate((indivMP) => {
+                        document.getElementById("fldSwitchMP").value = indivMP;
+                        displayMPs();
+                        document.getElementsByTagName("BUTTON")[1].click()//"Switch Marking Period btn"
+                    }, indivMarkingPeriod);
+                    let navResult = true;
+                    //Wait for the new marking period to load
+                    await page.waitForNavigation({ waitUntil: 'domcontentloaded' }).catch((err) => {
+                        console.log(err)
+                        console.log("Page Timed-out (switch MP) ----------------------------------------------------------")
+                        navResult = false;
+                    });
+                    if (!navResult) {
+                        await browser.close();
+                        console.log("Page Timed-out received - browser closed")
+                        return { Status: "Page Timed-out" }
+                    }
+                    //Check if the marking period has started yet
+                    if (await page.evaluate(() => { return document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]')) ? new Date() - new Date(document.getElementsByClassName("list")[0].getElementsByTagName("span")[0].innerText.match(new RegExp('[0-1]?[0-9]/[0-3]?[0-9]/[0-9][0-9]'))).getTime() > 0 : false })) {
+                        if (!grades[ClassName][indivMarkingPeriod])
+                            grades[ClassName][indivMarkingPeriod] = {}
+                        grades[ClassName][indivMarkingPeriod]["Assignments"] = await scrapeAssignments(page);
+                        const percent = await page.evaluate(() => document.getElementsByTagName("b")[0].innerText.replace(/\s+/g, ''))
+                        grades[ClassName][indivMarkingPeriod]["avg"] = getPercentFromStr(percent);
                     }
                 }
-                res()
-            }))
+            }
         }
     }
-    await Promise.all(classPromises)
     grades["Status"] = "Completed";
     await browser.close();
     return grades;
