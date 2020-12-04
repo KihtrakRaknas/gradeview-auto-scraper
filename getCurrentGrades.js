@@ -168,7 +168,7 @@ module.exports.getCurrentGrades = async function (email, pass, schoolDomain) {
     let classPromises = []
     for (let indivClass of classes) {
         if (indivClass) {
-            classPromises.push(new Promise(async (res)=>{
+            classPromises.push(await new Promise(async (res)=>{
                 //Select the class
                 [courseCode, courseSection]=indivClass.split(":")
                 const assignmentPage = await module.exports.createPage(browser,true)
