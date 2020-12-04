@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { getCurrentGrades, retriveJustUsername } = require('./GradeViewGetCurrentGrades/getCurrentGrades');
+const { getCurrentGrades, retriveJustUsername } = require('./getCurrentGrades');
 const express = require('express')
 const NodeRSA = require('node-rsa');
 const _ = require("lodash")
