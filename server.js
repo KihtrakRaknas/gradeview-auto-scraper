@@ -127,7 +127,7 @@ async function run(){
           console.log(listObj)
         }
       }else{
-        console.log("Not cached due to bad request - "+listObj["username"])
+        console.log("Not cached due to bad request - "+listObj["username"]+" - Status: " + dataObj["Status"])
       }
 
       var index = userDataList.indexOf(listObj);
