@@ -108,13 +108,10 @@ async function run(){
       else
         listObj = userDataList[userDataList.length-1]
 
-      var dataObj = await listObj["data"]
+      try{
+        var dataObj = await listObj["data"]
 
-      //TODO: LOOP THROUGH ARRAY (userDataList) AND DELETE the objects to save memory
-
-      if(dataObj["Status"] == "Completed"){
-        
-        try{
+        if(dataObj["Status"] == "Completed"){
           if(!listObj.usernameAsItAppearsInDatabase || !_.isEqual(userDataObj[listObj.usernameAsItAppearsInDatabase],dataObj)){
             userDataObj[listObj.usernameAsItAppearsInDatabase] = dataObj
             listObj["userRef"].set(dataObj);
@@ -122,13 +119,16 @@ async function run(){
           }else{
             console.log("No Changes Found - "+listObj["username"])
           }
-        }catch(e){
-          console.log(e)
-          console.log(listObj)
+        }else{
+          console.log("Not cached due to bad request - "+listObj["username"]+" - Status: " + dataObj["Status"])
         }
-      }else{
-        console.log("Not cached due to bad request - "+listObj["username"]+" - Status: " + dataObj["Status"])
+      }catch(e){
+        console.log("Err caught when evaluating getCurrentGrades promise")
+        console.log(e)
+        console.log(listObj)
       }
+
+
 
       var index = userDataList.indexOf(listObj);
       if (index > -1) {
