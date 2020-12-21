@@ -52,7 +52,7 @@ const users = [];
 const userDataObj={}
 let first = true;
 
-/*const userDataListener = db.collection('userData').onSnapshot(async snapshot => {
+const userDataListener = db.collection('userData').onSnapshot(async snapshot => {
   console.log("GETTING LIST OF USERS")
   let timestampPromises = []
   snapshot.docChanges().forEach(change => {
@@ -95,17 +95,17 @@ let first = true;
     console.log(`CALLING RUN w/ ${users.length} found!`)
     run();
   }
-})*/
-
-db.collection('userData').doc('10021258@sbstudents.org').get().then(async (doc)=>{
-  console.log("manual add")
-  let username = doc.id;
-  let password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
-  let school = doc.data()["school"]
-  for(var i = 0; i<20; i++)
-    users.push({username,password,school});
-  run();
 })
+
+// db.collection('userData').doc('10021258@sbstudents.org').get().then(async (doc)=>{
+//   console.log("manual add")
+//   let username = doc.id;
+//   let password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
+//   let school = doc.data()["school"]
+//   for(var i = 0; i<20; i++)
+//     users.push({username,password,school});
+//   run();
+// })
 
 // New version: 20 works fine; 
 const maxParalellChromes = 40; // 2 - 20 ; 3 - 20;4-30; 5 -crash
