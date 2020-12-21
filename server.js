@@ -153,6 +153,10 @@ async function run(){
       }
       return 'lel'
     }).catch(e=>{
+      const index = userDataList.indexOf(dataObjPromise);
+      if (index > -1) {
+        userDataList.splice(index, 1);
+      }
       console.log("Err caught when evaluating getCurrentGrades promise")
       console.log(e)
       console.log({username,password,school,dataObjPromise,usernameAsItAppearsInDatabase})
