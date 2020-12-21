@@ -114,7 +114,7 @@ async function run(){
   updateTimeStamps();
   console.log(users.length)
   for(user of users){ 
-    if(userDataList.length >= maxParalellChromes){
+    while(userDataList.length >= maxParalellChromes){
       await Promise.race(userDataList)
     }
     const usernameAsItAppearsInDatabase = user.username;
