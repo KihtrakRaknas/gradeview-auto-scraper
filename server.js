@@ -96,56 +96,50 @@ const userDataListener = db.collection('userData').onSnapshot(async snapshot => 
   }
 })
 
+// New version: 20 works fine; 
+const maxParalellChromes = 30; // 2 - 20 ; 3 - 20;4-30; 5 -crash
 async function run(){
   console.log("init")
   updateTimeStamps();
   console.log(users.length)
-  for(user of users){ // New version: 20 works fine; 
-    const maxParalellChromes = 30; // 2 - 20 ; 3 - 20;4-30; 5 -crash
-    if(userDataList.length > maxParalellChromes-1){
-      if(userDataList.length!=users.length)
-        listObj = userDataList[userDataList.length-maxParalellChromes]
-      else
-        listObj = userDataList[userDataList.length-1]
-
-      try{
-        var dataObj = await listObj["data"]
-
-        if(dataObj["Status"] == "Completed"){
-          if(!listObj.usernameAsItAppearsInDatabase || !_.isEqual(userDataObj[listObj.usernameAsItAppearsInDatabase],dataObj)){
-            userDataObj[listObj.usernameAsItAppearsInDatabase] = dataObj
-            listObj["userRef"].set(dataObj);
-            console.log("Updating Account - "+listObj["username"])
-          }else{
-            console.log("No Changes Found - "+listObj["username"])
-          }
-        }else{
-          console.log("Not cached due to bad request - "+listObj["username"]+" - Status: " + dataObj["Status"])
-        }
-      }catch(e){
-        console.log("Err caught when evaluating getCurrentGrades promise")
-        console.log(e)
-        console.log(listObj)
-      }
-
-
-
-      var index = userDataList.indexOf(listObj);
-      if (index > -1) {
-        userDataList.splice(index, 1);
-      }
+  for(user of users){ 
+    if(userDataList.length >= maxParalellChromes){
+      await Promise.race(userDataList)
     }
     var username = user.username;
+    username=retriveJustUsername(username)
     var password = user.password;
     var school = user.school;
     var userRef = db.collection('users').doc(username);
-    username=retriveJustUsername(username)
+    
+
     console.log("Starting scrape - "+username)
+
     //if(username == "10015309@sbstudents.org"||username == "10015311@sbstudents.org"){//if(username == "10013096@sbstudents.org"||username == "10012734@sbstudents.org"){
-        var dataObj = getCurrentGrades(username,password,school)
-        userDataList.push({data:dataObj,username,userRef,usernameAsItAppearsInDatabase:user.username})
-        //console.log(dataObj)
-        
+    var dataObjPromise = getCurrentGrades(username,password,school).then(dataObj=>{
+      if(dataObj["Status"] == "Completed"){
+        if(!listObj.usernameAsItAppearsInDatabase || !_.isEqual(userDataObj[listObj.usernameAsItAppearsInDatabase],dataObj)){
+          userDataObj[listObj.usernameAsItAppearsInDatabase] = dataObj
+          userRef.set(dataObj);
+          console.log("Updating Account - "+listObj["username"])
+        }else{
+          console.log("No Changes Found - "+listObj["username"])
+        }
+      }else{
+        console.log("Not cached due to bad request - "+listObj["username"]+" - Status: " + dataObj["Status"])
+      }
+
+      var index = userDataList.indexOf(dataObjPromise);
+      if (index > -1) {
+        userDataList.splice(index, 1);
+      }
+    }).catch(e=>{
+      console.log("Err caught when evaluating getCurrentGrades promise")
+      console.log(e)
+      console.log(listObj)
+    })
+    userDataList.push(dataObjPromise)
+    //console.log(dataObj)    
     //}
   }
   console.log("Done!")
