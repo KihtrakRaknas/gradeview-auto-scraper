@@ -107,8 +107,8 @@ db.collection('userData').doc('10021258@sbstudents.org').get().then(async (doc)=
   run();
 })
 
-// New version: 20 works fine; 30 seems fine;
-const maxParalellChromes = 5; // 2 - 20 ; 3 - 20;4-30; 5 -crash
+// New version: 20 works fine; 30 seems fine; 40 crash?
+const maxParalellChromes = 30; // 2 - 20 ; 3 - 20;4-30; 5 -crash
 async function run(){
   console.log("init")
   updateTimeStamps();
@@ -116,11 +116,16 @@ async function run(){
   for(user of users){ 
     while(userDataList.length >= maxParalellChromes){
       const promise = await Promise.race(userDataList)
-      const index = userDataList.indexOf(promise);
-      console.log(index)
-      if (index > -1) {
-        userDataList.splice(index, 1);
-      }
+      console.log(userDataList)
+      console.log(promise)
+      // const index = userDataList.findIndex(el=>promise.usernameAsItAppearsInDatabase == el.usernameAsItAppearsInDatabase && _.isEqual(promise,);
+      // console.log(index)
+      // if (index > -1) {
+      //   userDataList.splice(index, 1);
+      // }
+      await new Promise((res)=>{
+        setTimeout(()=>res("lol"),1000)
+      })
     }
     const usernameAsItAppearsInDatabase = user.username;
     const username = retriveJustUsername(usernameAsItAppearsInDatabase)
@@ -133,10 +138,10 @@ async function run(){
 
     //if(username == "10015309@sbstudents.org"||username == "10015311@sbstudents.org"){//if(username == "10013096@sbstudents.org"||username == "10012734@sbstudents.org"){
     const dataObjPromise = getCurrentGrades(username,password,school).then(dataObj=>{
-      // const index = userDataList.indexOf(dataObjPromise);
-      // if (index > -1) {
-      //   userDataList.splice(index, 1);
-      // }
+      const index = userDataList.indexOf(dataObjPromise);
+      if (index > -1) {
+        userDataList.splice(index, 1);
+      }
       if(dataObj["Status"] == "Completed"){
         if(!userDataObj[usernameAsItAppearsInDatabase] || !_.isEqual(userDataObj[usernameAsItAppearsInDatabase],dataObj)){
           userDataObj[usernameAsItAppearsInDatabase] = dataObj
