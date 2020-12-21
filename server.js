@@ -107,8 +107,8 @@ const userDataListener = db.collection('userData').onSnapshot(async snapshot => 
 //   run();
 // })
 
-// New version: 20 works fine; 
-const maxParalellChromes = 40; // 2 - 20 ; 3 - 20;4-30; 5 -crash
+// New version: 20 works fine; 30 seems fine;
+const maxParalellChromes = 35; // 2 - 20 ; 3 - 20;4-30; 5 -crash
 async function run(){
   console.log("init")
   updateTimeStamps();
