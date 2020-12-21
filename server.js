@@ -108,7 +108,7 @@ db.collection('userData').doc('10021258@sbstudents.org').get().then(async (doc)=
 })
 
 // New version: 20 works fine; 
-const maxParalellChromes = 5; // 2 - 20 ; 3 - 20;4-30; 5 -crash
+const maxParalellChromes = 40; // 2 - 20 ; 3 - 20;4-30; 5 -crash
 async function run(){
   console.log("init")
   updateTimeStamps();
