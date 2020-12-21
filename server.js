@@ -100,8 +100,8 @@ async function run(){
   console.log("init")
   updateTimeStamps();
   console.log(users.length)
-  for(user of users){
-    const maxParalellChromes = 20; // 2 - 20 ; 3 - 20;4-30; 5 -crash
+  for(user of users){ // New version: 20 works fine; 
+    const maxParalellChromes = 30; // 2 - 20 ; 3 - 20;4-30; 5 -crash
     if(userDataList.length > maxParalellChromes-1){
       if(userDataList.length!=users.length)
         listObj = userDataList[userDataList.length-maxParalellChromes]
