@@ -106,11 +106,12 @@ db.collection('userData').doc('10021258@sbstudents.org').get().then(async (doc)=
   for(var i = 0; i<50; i++)
     users.push({username,password,school});
   hrstart = process.hrtime()
-  run();
+  //run();
+  runOld();
 })
 
 // New version: 20 works fine; 30 crash? 25: 1hr; 
-const maxParalellChromes = 15; // 2 - 20 ; 3 - 20;4-30; 5 -crash
+const maxParalellChromes = 20; // 2 - 20 ; 3 - 20;4-30; 5 -crash
 async function run(){
   console.log("init")
   updateTimeStamps();
@@ -172,6 +173,61 @@ async function run(){
   console.info('Execution time (hr): %ds %dms', hrend[0], hrend[1] / 1000000)
   console.log("Done!")
   //run();
+}
+
+async function runOld(){
+  console.log("init")
+  updateTimeStamps();
+  console.log(users.length)
+  for(user of users){ // New version: 20 works fine; 
+    if(userDataList.length > maxParalellChromes-1){
+      if(userDataList.length!=users.length)
+        listObj = userDataList[userDataList.length-maxParalellChromes]
+      else
+        listObj = userDataList[userDataList.length-1]
+
+      try{
+        var dataObj = await listObj["data"]
+
+        if(dataObj["Status"] == "Completed"){
+          if(!listObj.usernameAsItAppearsInDatabase || !_.isEqual(userDataObj[listObj.usernameAsItAppearsInDatabase],dataObj)){
+            userDataObj[listObj.usernameAsItAppearsInDatabase] = dataObj
+            listObj["userRef"].set(dataObj);
+            console.log("Updating Account - "+listObj["username"])
+          }else{
+            console.log("No Changes Found - "+listObj["username"])
+          }
+        }else{
+          console.log("Not cached due to bad request - "+listObj["username"]+" - Status: " + dataObj["Status"])
+        }
+      }catch(e){
+        console.log("Err caught when evaluating getCurrentGrades promise")
+        console.log(e)
+        console.log(listObj)
+      }
+
+      var index = userDataList.indexOf(listObj);
+      if (index > -1) {
+        userDataList.splice(index, 1);
+      }
+    }
+    var username = user.username;
+    var password = user.password;
+    var school = user.school;
+    var userRef = db.collection('users').doc(username);
+    username=retriveJustUsername(username)
+    console.log("Starting scrape - "+username)
+    //if(username == "10015309@sbstudents.org"||username == "10015311@sbstudents.org"){//if(username == "10013096@sbstudents.org"||username == "10012734@sbstudents.org"){
+        var dataObj = getCurrentGrades(username,password,school)
+        userDataList.push({data:dataObj,username,userRef,usernameAsItAppearsInDatabase:user.username})
+        //console.log(dataObj)
+        
+    //}
+  }
+  await Promise.all(userDataList)
+  var hrend = process.hrtime(hrstart)
+  console.info('Execution time (hr): %ds %dms', hrend[0], hrend[1] / 1000000)
+  console.log("Done!")
 }
 
 /* var cronJob = cron.job("15 6 * * *", function(){ //25 7,9,11,13,16 * * *
