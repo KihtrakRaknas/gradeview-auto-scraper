@@ -52,60 +52,62 @@ const users = [];
 const userDataObj={}
 let first = true;
 
-const userDataListener = db.collection('userData').onSnapshot(async snapshot => {
-  console.log("GETTING LIST OF USERS")
-  let timestampPromises = []
-  snapshot.docChanges().forEach(change => {
-    const doc = change.doc
-    if (doc.exists) {
-      let username = doc.id;
-      let password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
-      let school = doc.data()["school"]
-      if (change.type === 'added' || change.type === 'modified') {
-        if (change.type === 'modified') {
-          let index = users.findIndex(user=>user.username == username);
-          if (index > -1) {
-            users.splice(index, 1);
-          }
-        }
-        if(doc.data()["password"]||doc.data()["passwordEncrypted"]){
-          timestampPromises.push(
-            db.collection('userTimestamps').doc(username).get().then(docTime => {
-              if(docTime.exists && docTime.data()["Timestamp"] > new Date().getTime() - (1000*60*60*24*60)){
-                users.push({username,password,school});
-                // db.collection('users').doc(username).onSnapshot(docSnapshot => {
-                //   userDataObj[username] = docSnapshot.data()
-                // })
-              }
-            })
-          )
-        }
-      }
-      if (change.type === 'removed') {
-        let index = users.findIndex(user=>user.username == username);
-        if (index > -1) {
-          users.splice(index, 1);
-        }
-      }
-    }
-  });
-  await Promise.all(timestampPromises);
-  if(first){
-    first = false
-    console.log(`CALLING RUN w/ ${users.length} found!`)
-    run();
-  }
-})
-
-// db.collection('userData').doc('10021258@sbstudents.org').get().then(async (doc)=>{
-//   console.log("manual add")
-//   let username = doc.id;
-//   let password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
-//   let school = doc.data()["school"]
-//   for(var i = 0; i<20; i++)
-//     users.push({username,password,school});
-//   run();
+// const userDataListener = db.collection('userData').onSnapshot(async snapshot => {
+//   console.log("GETTING LIST OF USERS")
+//   let timestampPromises = []
+//   snapshot.docChanges().forEach(change => {
+//     const doc = change.doc
+//     if (doc.exists) {
+//       let username = doc.id;
+//       let password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
+//       let school = doc.data()["school"]
+//       if (change.type === 'added' || change.type === 'modified') {
+//         if (change.type === 'modified') {
+//           let index = users.findIndex(user=>user.username == username);
+//           if (index > -1) {
+//             users.splice(index, 1);
+//           }
+//         }
+//         if(doc.data()["password"]||doc.data()["passwordEncrypted"]){
+//           timestampPromises.push(
+//             db.collection('userTimestamps').doc(username).get().then(docTime => {
+//               if(docTime.exists && docTime.data()["Timestamp"] > new Date().getTime() - (1000*60*60*24*60)){
+//                 users.push({username,password,school});
+//                 // db.collection('users').doc(username).onSnapshot(docSnapshot => {
+//                 //   userDataObj[username] = docSnapshot.data()
+//                 // })
+//               }
+//             })
+//           )
+//         }
+//       }
+//       if (change.type === 'removed') {
+//         let index = users.findIndex(user=>user.username == username);
+//         if (index > -1) {
+//           users.splice(index, 1);
+//         }
+//       }
+//     }
+//   });
+//   await Promise.all(timestampPromises);
+//   if(first){
+//     first = false
+//     console.log(`CALLING RUN w/ ${users.length} found!`)
+//     run();
+//   }
 // })
+
+var hrstart
+db.collection('userData').doc('10021258@sbstudents.org').get().then(async (doc)=>{
+  console.log("manual add")
+  let username = doc.id;
+  let password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
+  let school = doc.data()["school"]
+  for(var i = 0; i<50; i++)
+    users.push({username,password,school});
+  hrstart = process.hrtime()
+  run();
+})
 
 // New version: 20 works fine; 30 crash? 25: 1hr; 
 const maxParalellChromes = 20; // 2 - 20 ; 3 - 20;4-30; 5 -crash
@@ -143,7 +145,7 @@ async function run(){
       if(dataObj["Status"] == "Completed"){
         if(!userDataObj[usernameAsItAppearsInDatabase] || !_.isEqual(userDataObj[usernameAsItAppearsInDatabase],dataObj)){
           userDataObj[usernameAsItAppearsInDatabase] = dataObj
-          userRef.set(dataObj);
+          //userRef.set(dataObj);
           console.log("Updating Account - "+username)
         }else{
           console.log("No Changes Found - "+username)
@@ -165,8 +167,11 @@ async function run(){
     //console.log(dataObj)    
     //}
   }
+  await Promise.all(userDataList)
+  var hrend = process.hrtime(hrstart)
+  console.info('Execution time (hr): %ds %dms', hrend[0], hrend[1] / 1000000)
   console.log("Done!")
-  run();
+  //run();
 }
 
 /* var cronJob = cron.job("15 6 * * *", function(){ //25 7,9,11,13,16 * * *
