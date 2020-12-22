@@ -106,8 +106,8 @@ db.collection('userData').doc('10021258@sbstudents.org').get().then(async (doc)=
   for(var i = 0; i<50; i++)
     users.push({username,password,school});
   hrstart = process.hrtime()
-  //run();
-  runOld();
+  run();
+  //runOld();
 })
 
 // New version: 20 works fine; 30 crash? 25: 1hr; 
@@ -170,9 +170,11 @@ async function run(){
   }
   await Promise.all(userDataList)
   var hrend = process.hrtime(hrstart)
-  console.info('Execution time (hr): %ds %dms', hrend[0], hrend[1] / 1000000)
+  console.info('New - Execution time (hr): %ds %dms', hrend[0], hrend[1] / 1000000)
   console.log("Done!")
   //run();
+  hrstart = process.hrtime()
+  runOld()
 }
 
 async function runOld(){
@@ -226,7 +228,7 @@ async function runOld(){
   }
   await Promise.all(userDataList)
   var hrend = process.hrtime(hrstart)
-  console.info('Execution time (hr): %ds %dms', hrend[0], hrend[1] / 1000000)
+  console.info('Old - Execution time (hr): %ds %dms', hrend[0], hrend[1] / 1000000)
   console.log("Done!")
 }
 
