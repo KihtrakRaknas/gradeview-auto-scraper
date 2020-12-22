@@ -145,7 +145,7 @@ async function run(){
       if(dataObj["Status"] == "Completed"){
         if(!userDataObj[usernameAsItAppearsInDatabase] || !_.isEqual(userDataObj[usernameAsItAppearsInDatabase],dataObj)){
           userDataObj[usernameAsItAppearsInDatabase] = dataObj
-          //userRef.set(dataObj);
+          userRef.set(dataObj);
           console.log("Updating Account - "+username)
         }else{
           console.log("No Changes Found - "+username)
