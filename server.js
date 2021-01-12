@@ -110,7 +110,7 @@ var hrstart = process.hrtime()
 // })
 
 // New version: 20 works fine; 30 crash? 25: 1hr; 
-const maxParalellChromes = 25; // 2 - 20 ; 3 - 20;4-30; 5 -crash
+const maxParalellChromes = 20; // 2 - 20 ; 3 - 20;4-30; 5 -crash
 async function run(){
   console.log("init")
   updateTimeStamps();
