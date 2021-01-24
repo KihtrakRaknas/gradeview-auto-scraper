@@ -52,6 +52,12 @@ const users = [];
 const userDataObj={}
 let first = true;
 
+setInterval(()=>{
+  console.log("###################################################################################")
+  console.log(`userDataList: ${userDataList.length}; users: ${users.length}; userDataObj: ${Object.keys(userDataObj).length}`)
+  console.log("###################################################################################")
+},1*60*1000)
+
 const userDataListener = db.collection('userData').onSnapshot(async snapshot => {
   console.log("GETTING LIST OF USERS")
   let timestampPromises = []
@@ -110,7 +116,7 @@ var hrstart = process.hrtime()
 // })
 
 // New version: 20 works fine; 30 crash? 25: 1hr; 
-const maxParalellChromes = 22; // 2 - 20 ; 3 - 20;4-30; 5 -crash
+const maxParalellChromes = 20; // 2 - 20 ; 3 - 20;4-30; 5 -crash
 async function run(){
   console.log("init")
   updateTimeStamps();
@@ -122,9 +128,7 @@ async function run(){
       await Promise.race(userDataList)
       if(i>1){
         console.log(`${i}th iteration: ${userDataList}`)
-        await new Promise((res)=>{
-          setTimeout(()=>res("lol"),1000)
-        })
+        await new Promise((res)=>{setTimeout(()=>res("lol"),1000)})
       }
     }
     const usernameAsItAppearsInDatabase = user.username;
