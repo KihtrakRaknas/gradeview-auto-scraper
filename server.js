@@ -55,6 +55,10 @@ let first = true;
 setInterval(()=>{
   console.log("###################################################################################")
   console.log(`userDataList: ${userDataList.length}; users: ${users.length}; userDataObj: ${Object.keys(userDataObj).length}`)
+  const mem = process.memoryUsage()
+  for(let memProp in mem)
+    mem[memProp]=Math.ceil(mem[memProp]/1024/1024)+" MB"
+  console.log(mem)
   console.log("###################################################################################")
 },1*60*1000)
 
