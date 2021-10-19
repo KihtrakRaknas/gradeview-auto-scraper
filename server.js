@@ -108,15 +108,15 @@ const userDataListener = db.collection('userData').onSnapshot(async snapshot => 
 })
 
 var hrstart = process.hrtime()
+
 // db.collection('userData').doc('10021258@sbstudents.org').get().then(async (doc)=>{
 //   console.log("manual add")
 //   let username = doc.id;
 //   let password = doc.data()["password"]?doc.data()["password"]:key.decrypt(doc.data()["passwordEncrypted"], 'utf8');
 //   let school = doc.data()["school"]
-//   for(var i = 0; i<50; i++)
+//   // for(var i = 0; i<50; i++)
 //     users.push({username,password,school});
 //   run();
-//   //runOld();
 // })
 
 // New version: 20 works fine; 30 crash? 25: 1hr; 
