@@ -143,13 +143,14 @@ async function run(){
     
 
     console.log("Starting scrape - "+username)
-
+    let globalDataObj
     //if(username == "10015309@sbstudents.org"||username == "10015311@sbstudents.org"){//if(username == "10013096@sbstudents.org"||username == "10012734@sbstudents.org"){
     const dataObjPromise = getCurrentGrades(username,password,school).then(dataObj=>{
       const index = userDataList.indexOf(dataObjPromise);
       if (index > -1) {
         userDataList.splice(index, 1);
       }
+      globalDataObj = dataObj
       if(dataObj["Status"] == "Completed"){
         if(!userDataObj[usernameAsItAppearsInDatabase] || !_.isEqual(userDataObj[usernameAsItAppearsInDatabase],dataObj)){
           userDataObj[usernameAsItAppearsInDatabase] = dataObj
@@ -167,6 +168,7 @@ async function run(){
       if (index > -1) {
         userDataList.splice(index, 1);
       }
+      console.log(JSON.stringify(globalDataObj))
       console.log("Err caught when evaluating getCurrentGrades promise")
       console.log(e)
       console.log({username,password,school,dataObjPromise,usernameAsItAppearsInDatabase})
