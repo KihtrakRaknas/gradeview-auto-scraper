@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { getCurrentGrades, retriveJustUsername } = require('./GradeViewGetCurrentGrades/getCurrentGrades');
+const { getCurrentGrades, retriveJustUsername, initProxies } = require('./GradeViewGetCurrentGrades/getCurrentGrades');
 const express = require('express')
 const NodeRSA = require('node-rsa');
 const _ = require("lodash")
@@ -17,6 +17,10 @@ const app = express()
 const port = process.env.PORT || 3000
 
 var cron = require('cron');
+
+initProxies({
+  newProxyOnFail: false
+})
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
