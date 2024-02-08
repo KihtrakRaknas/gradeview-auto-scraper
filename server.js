@@ -61,12 +61,13 @@ let first = true;
 setInterval(()=>{
   console.log("###################################################################################")
   console.log(`userDataList: ${userDataList.length}; users: ${users.length}; userDataObj: ${Object.keys(userDataObj).length}`)
+  console.log(userDataList)
   const mem = process.memoryUsage()
   for(let memProp in mem)
     mem[memProp]=Math.ceil(mem[memProp]/1024/1024)+" MB"
   console.log(mem)
   console.log("###################################################################################")
-},1*60*1000)
+},10*60*1000)
 
 const userDataListener = db.collection('userData').onSnapshot(async snapshot => {
   console.log("GETTING LIST OF USERS")
@@ -155,6 +156,8 @@ async function run(){
       const index = userDataList.indexOf(dataObjPromise);
       if (index > -1) {
         userDataList.splice(index, 1);
+      }else{
+        console.error("Failed to remove promise from userDataList")
       }
       globalDataObj = dataObj
       if(dataObj["Status"] == "Completed"){
@@ -173,6 +176,8 @@ async function run(){
       const index = userDataList.indexOf(dataObjPromise);
       if (index > -1) {
         userDataList.splice(index, 1);
+      }else{
+        console.error("Failed to remove promise from userDataList")
       }
       console.log(JSON.stringify(globalDataObj))
       console.log("Err caught when evaluating getCurrentGrades promise")
