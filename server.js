@@ -19,7 +19,9 @@ const port = process.env.PORT || 3000
 var cron = require('cron');
 
 initProxies({
-  newProxyOnFail: false
+  newProxyOnFail: false,
+  checkProxyInterval: 60,
+  requestTimeout: -1
 })
 
 admin.initializeApp({
