@@ -21,7 +21,7 @@ var cron = require('cron');
 initProxies({
   newProxyOnFail: false,
   checkProxyInterval: 60,
-  requestTimeout: -1
+  requestTimeout: 2*60,
 })
 
 admin.initializeApp({
