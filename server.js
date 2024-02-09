@@ -20,7 +20,7 @@ var cron = require('cron');
 
 initProxies({
   newProxyOnFail: false,
-  checkProxyInterval: 60,
+  checkProxyInterval: 10,
   requestTimeout: 2*60,
 })
 
