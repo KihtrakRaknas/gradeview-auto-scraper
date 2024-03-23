@@ -133,6 +133,7 @@ async function run(){
   updateTimeStamps();
   console.log(users.length)
   for(user of users){ 
+    await new Promise((res)=>{setTimeout(()=>res("lol"),5000)})
     let i = 0
     while(userDataList.length >= maxParalellChromes){
       i++
