@@ -109,6 +109,7 @@ const userDataListener = db.collection('userData').onSnapshot(async snapshot => 
   await Promise.all(timestampPromises);
   if(first){
     first = false
+    users.sort(() => Math.random() - 0.5)
     console.log(`CALLING RUN w/ ${users.length} found!`)
     run();
   }
