@@ -19,5 +19,5 @@ jobs:
       - name: Push to dokku
         uses: dokku/github-action@master
         with:
-          git_remote_url: 'ssh://dokku@5.161.84.125:22/auto-scraper-gradeview'
+          git_remote_url: 'ssh://dokku@5.161.179.153:22/auto-scraper-gradeview'
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
