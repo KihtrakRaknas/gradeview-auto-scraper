@@ -18,11 +18,12 @@ const port = process.env.PORT || 3000
 
 var cron = require('cron');
 
-initProxies({
-  newProxyOnFail: false,
-  checkProxyInterval: 10,
-  requestTimeout: 2*60,
-})
+if(process.env.USE_PROXY)
+  initProxies({
+    newProxyOnFail: false,
+    checkProxyInterval: 10,
+    requestTimeout: 2*60,
+  })
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
