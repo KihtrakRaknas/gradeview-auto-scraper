@@ -18,7 +18,7 @@ const port = process.env.PORT || 3000
 
 var cron = require('cron');
 
-if(process.env.USE_PROXY)
+if(process.env.USE_PROXYLIST)
   initProxies({
     newProxyOnFail: false,
     checkProxyInterval: 10,
